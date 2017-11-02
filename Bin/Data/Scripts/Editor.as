@@ -162,6 +162,50 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
             }
         }
     }
+    
+    
+    if (activeViewport !is null) 
+    {
+      //Camera@ camera = activeViewport.camera;
+      Matrix4 proj = activeViewport.camera.projection;
+      
+      Vector4 projInfo = Vector4(	2.0f / proj.m00,
+              2.0f / proj.m11,
+              -(1.0f + proj.m02) / proj.m00,
+              -(1.0f + proj.m12) / proj.m11);
+       
+      
+      renderPath.shaderParameters["ProjInfo"] = Variant(projInfo);
+      
+      float viewSize = 2.0f * camera.halfViewSize;
+			float s = graphics.height / viewSize;
+			renderPath.shaderParameters["ProjScale"] = Variant(s);
+			
+			Matrix3x4 view = activeViewport.camera.view;
+			Matrix3 v3 = view.ToMatrix3().Transpose();
+			renderPath.shaderParameters["View"] = Variant(v3);
+			
+			
+			float ao_radius = 2.0f;
+			renderPath.shaderParameters["Radius"] = Variant(ao_radius);
+			
+			float ao_projscale = 0.2f;
+			renderPath.shaderParameters["ProjScale2"] = Variant(ao_projscale);
+			
+			float ao_intensity = 0.003f;  // 0.001f,  4.0f
+			renderPath.shaderParameters["IntensityDivR6"] = Variant(ao_intensity);
+
+			float ao_bias = 0.002f; //0.000f,  0.5f
+			renderPath.shaderParameters["Bias"] = Variant(ao_bias);
+			
+			Vector3 ao_var1 = Vector3(0.0f, -1.0f, 1.0f);
+			Vector3 ao_var2 = Vector3(1.0f, 0.0f, 1.0f);
+			renderPath.shaderParameters["Var1"] = Variant(ao_var1);
+			renderPath.shaderParameters["Var2"] = Variant(ao_var2);
+			
+			renderPath.SetEnabled("SAO_copy", true);
+			renderPath.SetEnabled("BlurGaussianDepth", true);
+    }
 }
 
 void HandleReloadFinishOrFail(StringHash eventType, VariantMap& eventData)
