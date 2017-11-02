@@ -204,6 +204,7 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
 			renderPath.shaderParameters["Var2"] = Variant(ao_var2);
 			
 			renderPath.SetEnabled("SAO_copy", true);
+			renderPath.SetEnabled("BlurGaussian", false);
 			renderPath.SetEnabled("BlurGaussianDepth", true);
     }
 }
