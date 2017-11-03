@@ -3,7 +3,7 @@
 // by Morgan McGuire and Michael Mara, NVIDIA Research. See license_sao.txt
 // Urho3D adaption by reattiva.
 
-//#extension GL_EXT_gpu_shader4: require
+#extension GL_EXT_gpu_shader4: require
 
 #include "Uniforms.glsl"
 #include "Samplers.glsl"
@@ -12,10 +12,10 @@
 
 #line 13
 
-varying vec2 vScreenPos;
-varying vec3 vFarRay;
-
 #ifdef COMPILEVS
+
+out vec2 vScreenPos;
+out vec3 vFarRay;
 
 // Gets a vector in view space pointing to 'clipPos' of the far plane.
 // We can use this to calculate the view space position of the fragment
@@ -38,8 +38,10 @@ void VS()
 
 #endif
 
-
 #ifdef COMPILEPS
+
+in vec2 vScreenPos;
+in vec3 vFarRay;
 
 // Total number of direct samples to take at each pixel
 #define NUM_SAMPLES 9.0
@@ -57,7 +59,7 @@ uniform vec4 cGBufferOffsets;
 // To transform screen pos to view space 
 uniform vec4 cProjInfo;
 // View matrix
-uniform mat3 cView;
+uniform mat3 cCustomView;
 
 // Multiplier of the noise textures, often you see = sizeof(viewport) / sizeof(noise)
 uniform float cNoiseMult;
@@ -132,7 +134,8 @@ void PS()
 
 #ifdef NORMAL_MAP
     vec3 normal = DecodeNormal(texture2D(sNormalMap, vScreenPos));
-    vec3 vsN = cView * normal;
+    vec3 vsN =  cCustomView * normal;
+    //vec3 vsN =  (transpose(cView) * vec4(normal, 0)).xyz;
 #else
     // Reconstruct normals from positions. These will lead to 1-pixel black lines
     // at depth discontinuities, however the blur will wipe those out so they are 
